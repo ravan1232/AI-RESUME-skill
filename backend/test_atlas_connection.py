@@ -60,3 +60,4 @@ async def verify_atlas(connection_url: str = None):
 if __name__ == "__main__":
     uri = sys.argv[1] if len(sys.argv) > 1 else None
     asyncio.run(verify_atlas(uri))
+
