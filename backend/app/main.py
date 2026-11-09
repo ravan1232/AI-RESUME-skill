@@ -4,7 +4,7 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import db_manager
-from app.routers import auth, students
+from app.routers import auth, students, resumes, jobs, exchange, chat, assessments, ai, admin
 
 # Setup structured logging
 logging.basicConfig(
@@ -42,9 +42,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API Routers
+# Include All System API Routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(students.router, prefix=settings.API_V1_PREFIX)
+app.include_router(resumes.router, prefix=settings.API_V1_PREFIX)
+app.include_router(jobs.router, prefix=settings.API_V1_PREFIX)
+app.include_router(exchange.router, prefix=settings.API_V1_PREFIX)
+app.include_router(chat.router, prefix=settings.API_V1_PREFIX)
+app.include_router(assessments.router, prefix=settings.API_V1_PREFIX)
+app.include_router(ai.router, prefix=settings.API_V1_PREFIX)
+app.include_router(admin.router, prefix=settings.API_V1_PREFIX)
 
 @app.get("/", tags=["Health"])
 async def root():

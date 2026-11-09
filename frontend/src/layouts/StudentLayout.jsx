@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { Navbar } from '../components/common/Navbar';
 import { Sidebar } from '../components/common/Sidebar';
+import { AIChatWidget } from '../components/common/AIChatWidget';
 import { useAuth } from '../context/AuthContext';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 
@@ -22,7 +23,7 @@ export const StudentLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col antialiased">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col antialiased relative">
       <Navbar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
       <div className="flex flex-1">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -30,6 +31,8 @@ export const StudentLayout = () => {
           <Outlet />
         </main>
       </div>
+      {/* Floating AI Placement Chatbot */}
+      <AIChatWidget />
     </div>
   );
 };
