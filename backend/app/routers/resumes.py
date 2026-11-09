@@ -150,3 +150,4 @@ async def get_latest_resume(current_user: dict = Depends(get_current_user)):
         "improvements": latest.get("improvements", []),
         "created_at": latest["created_at"]
     }
+

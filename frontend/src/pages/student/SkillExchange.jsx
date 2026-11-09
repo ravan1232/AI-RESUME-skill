@@ -126,31 +126,28 @@ export const SkillExchange = () => {
         <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-800/80 pt-4">
           <button
             onClick={() => setActiveTab('requests')}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${
-              activeTab === 'requests'
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${activeTab === 'requests'
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                 : 'bg-white/10 text-slate-300 hover:bg-white/20'
-            }`}
+              }`}
           >
             📬 Exchange Requests ({requests.incoming.length + requests.outgoing.length})
           </button>
           <button
             onClick={() => setActiveTab('sessions')}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${
-              activeTab === 'sessions'
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${activeTab === 'sessions'
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                 : 'bg-white/10 text-slate-300 hover:bg-white/20'
-            }`}
+              }`}
           >
             📅 Scheduled Sessions ({sessions.length})
           </button>
           <button
             onClick={() => setActiveTab('mentors')}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${
-              activeTab === 'mentors'
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${activeTab === 'mentors'
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                 : 'bg-white/10 text-slate-300 hover:bg-white/20'
-            }`}
+              }`}
           >
             🌟 Browse Campus Mentors ({matches.length})
           </button>
@@ -172,10 +169,9 @@ export const SkillExchange = () => {
                     <div>
                       <div className="flex items-center space-x-2">
                         <span className="font-bold text-slate-900 text-sm">{req.peer_name}</span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
-                          req.status === 'accepted' ? 'bg-emerald-100 text-emerald-800' :
-                          req.status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-                        }`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${req.status === 'accepted' ? 'bg-emerald-100 text-emerald-800' :
+                            req.status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
+                          }`}>
                           {req.status}
                         </span>
                       </div>
@@ -244,10 +240,9 @@ export const SkillExchange = () => {
                     <div>
                       <div className="flex items-center space-x-2">
                         <span className="font-semibold text-slate-800 text-sm">To: {req.peer_name}</span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
-                          req.status === 'accepted' ? 'bg-emerald-100 text-emerald-800' :
-                          req.status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-                        }`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${req.status === 'accepted' ? 'bg-emerald-100 text-emerald-800' :
+                            req.status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
+                          }`}>
                           {req.status}
                         </span>
                       </div>

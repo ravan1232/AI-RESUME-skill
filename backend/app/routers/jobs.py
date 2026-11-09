@@ -162,3 +162,4 @@ async def get_latest_job_analysis(current_user: dict = Depends(get_current_user)
         "recommended_partners": latest.get("recommended_partners", []),
         "created_at": latest["created_at"]
     }
+

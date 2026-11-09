@@ -304,3 +304,4 @@ class AIService:
         }
 
 ai_service = AIService()
+

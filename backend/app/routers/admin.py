@@ -144,3 +144,4 @@ async def delete_skill(
 @router.get("/assessments")
 async def get_admin_assessments(admin: dict = Depends(get_current_admin)):
     return {"question_bank": QUESTION_BANKS}
+

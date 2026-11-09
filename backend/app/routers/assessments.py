@@ -263,3 +263,4 @@ async def submit_assessment(
         "message": f"Congratulations! You scored {score_pct}% and verified this skill!" if passed else f"You scored {score_pct}%. Passing score is 70%. Try again!",
         "feedback": feedback
     }
+

@@ -18,9 +18,6 @@ async def lifespan(app: FastAPI):
     # Startup actions
     logger.info("Initializing SkillBridge AI backend services...")
     await db_manager.connect()
-    # Seed demo users & initial data
-    from app.utils.seed_data import seed_initial_data
-    await seed_initial_data()
     yield
     # Shutdown actions
     logger.info("Shutting down SkillBridge AI backend services...")

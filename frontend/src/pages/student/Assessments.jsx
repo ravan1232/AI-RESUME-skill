@@ -107,11 +107,10 @@ export const Assessments = () => {
             <button
               key={s.skill_name}
               onClick={() => setSelectedSkill(s.skill_name)}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${
-                selectedSkill === s.skill_name
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${selectedSkill === s.skill_name
                   ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
                   : 'bg-white/10 text-slate-300 hover:bg-white/20'
-              }`}
+                }`}
             >
               🎯 {s.skill_name} Test ({s.question_count} MCQs)
             </button>
@@ -133,17 +132,16 @@ export const Assessments = () => {
                     <label
                       key={optIdx}
                       onClick={() => handleSelectAnswer(q.id, optIdx)}
-                      className={`flex items-center space-x-3 p-3 rounded-xl border text-xs cursor-pointer transition ${
-                        answers[q.id] === optIdx
+                      className={`flex items-center space-x-3 p-3 rounded-xl border text-xs cursor-pointer transition ${answers[q.id] === optIdx
                           ? 'bg-blue-50 border-blue-600 text-blue-900 font-semibold shadow-sm'
                           : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100/60'
-                      }`}
+                        }`}
                     >
                       <input
                         type="radio"
                         name={`q_${q.id}`}
                         checked={answers[q.id] === optIdx}
-                        onChange={() => {}}
+                        onChange={() => { }}
                         className="text-blue-600 focus:ring-blue-500"
                       />
                       <span>{opt}</span>
@@ -179,9 +177,8 @@ export const Assessments = () => {
         <div className="space-y-6 animate-fade-in">
           <Card className={result.passed ? 'border-2 border-emerald-500' : 'border-2 border-amber-500'}>
             <div className="text-center py-6">
-              <div className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 ${
-                result.passed ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
-              }`}>
+              <div className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 ${result.passed ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+                }`}>
                 {result.passed ? <CheckCircle2 className="w-10 h-10" /> : <XCircle className="w-10 h-10" />}
               </div>
               <h2 className="text-2xl font-bold text-slate-900">
@@ -221,17 +218,15 @@ export const Assessments = () => {
               {result.feedback?.map((f, i) => (
                 <div
                   key={i}
-                  className={`p-4 rounded-xl border ${
-                    f.is_correct ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'
-                  }`}
+                  className={`p-4 rounded-xl border ${f.is_correct ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'
+                    }`}
                 >
                   <div className="flex items-start justify-between">
                     <p className="font-semibold text-slate-800 text-sm">
                       {i + 1}. {f.question}
                     </p>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
-                      f.is_correct ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                    }`}>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${f.is_correct ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      }`}>
                       {f.is_correct ? 'Correct' : 'Incorrect'}
                     </span>
                   </div>

@@ -51,15 +51,24 @@ export const Navbar = ({ onToggleSidebar }) => {
       <div className="flex items-center space-x-3.5">
         <div className="hidden sm:flex items-center space-x-2 px-3 py-1 bg-slate-100/80 border border-slate-200 rounded-full text-xs font-medium text-slate-700">
           {isAdmin ? (
-            <>
-              <Shield className="w-3.5 h-3.5 text-amber-600" />
-              <span className="text-amber-800 font-semibold">Admin Mode</span>
-            </>
+            <div className="flex items-center space-x-2">
+              <span className="flex items-center text-amber-800 font-semibold space-x-1">
+                <Shield className="w-3.5 h-3.5 text-amber-600" />
+                <span>Admin</span>
+              </span>
+              <span className="text-slate-300">|</span>
+              <Link
+                to={window.location.pathname.startsWith('/admin') ? '/dashboard' : '/admin'}
+                className="text-blue-600 hover:text-blue-700 font-semibold transition"
+              >
+                {window.location.pathname.startsWith('/admin') ? 'Student View →' : '← Admin Console'}
+              </Link>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center space-x-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Student Portal</span>
-            </>
+              <span className="font-semibold text-slate-700">Student Portal</span>
+            </div>
           )}
         </div>
 

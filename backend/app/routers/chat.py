@@ -125,3 +125,4 @@ async def websocket_endpoint(websocket: WebSocket, exchange_id: str):
                 await manager.broadcast(exchange_id, doc)
     except WebSocketDisconnect:
         manager.disconnect(exchange_id, websocket)
+

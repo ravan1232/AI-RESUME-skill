@@ -115,9 +115,8 @@ export const Chat = () => {
                 <button
                   key={ex.id}
                   onClick={() => setSelectedExchange(ex)}
-                  className={`w-full text-left p-4 transition flex items-center space-x-3 ${
-                    selectedExchange?.id === ex.id ? 'bg-blue-50/80 border-l-4 border-l-blue-600' : 'hover:bg-slate-50'
-                  }`}
+                  className={`w-full text-left p-4 transition flex items-center space-x-3 ${selectedExchange?.id === ex.id ? 'bg-blue-50/80 border-l-4 border-l-blue-600' : 'hover:bg-slate-50'
+                    }`}
                 >
                   <div className="w-10 h-10 rounded-full bg-navy-900 text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
                     {ex.peer_name?.slice(0, 2).toUpperCase() || 'P'}
@@ -161,11 +160,10 @@ export const Chat = () => {
                       className={`flex flex-col ${m.is_me ? 'items-end' : 'items-start'}`}
                     >
                       <div
-                        className={`max-w-md px-4 py-2.5 rounded-2xl text-xs shadow-sm ${
-                          m.is_me
+                        className={`max-w-md px-4 py-2.5 rounded-2xl text-xs shadow-sm ${m.is_me
                             ? 'bg-blue-600 text-white rounded-br-none'
                             : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'
-                        }`}
+                          }`}
                       >
                         <p>{m.content}</p>
                       </div>
