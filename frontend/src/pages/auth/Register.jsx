@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Sparkles, Lock, Mail, User, Shield, ArrowRight } from 'lucide-react';
+import { GoogleSignInButton } from '../../components/common/GoogleSignInButton';
 
 export const Register = () => {
   const [fullName, setFullName] = useState('');
@@ -11,9 +12,28 @@ export const Register = () => {
   const [role, setRole] = useState('student');
   const [loading, setLoading] = useState(false);
 
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credential) => {
+    try {
+      setLoading(true);
+      const user = await loginWithGoogle(credential, role);
+      showToast(`Signed up with Google! Welcome, ${user.full_name}`, 'success');
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      console.error(err);
+      const msg = err.response?.data?.detail || 'Google registration failed';
+      showToast(msg, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -87,6 +107,25 @@ export const Register = () => {
           >
             🛡️ Platform Admin
           </button>
+        </div>
+
+        {/* Google Authentication Button */}
+        <div className="mb-5">
+          <GoogleSignInButton
+            text={`Sign up as ${role === 'admin' ? 'Admin' : 'Student'} with Google`}
+            role={role}
+            onSuccess={handleGoogleSuccess}
+            onError={(err) => showToast(err, 'error')}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="relative flex items-center justify-center mb-5">
+          <div className="border-t border-slate-200 w-full" />
+          <span className="bg-white px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider relative">
+            or with email
+          </span>
+          <div className="border-t border-slate-200 w-full" />
         </div>
 
         {/* Form */}

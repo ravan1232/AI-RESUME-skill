@@ -12,6 +12,10 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+class GoogleAuthRequest(BaseModel):
+    credential: str
+    role: Optional[str] = "student"
+
 class UserResponse(BaseModel):
     id: str
     email: str

@@ -58,6 +58,16 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
+  const loginWithGoogle = async (credential, role = 'student') => {
+    const response = await api.post('/auth/google', { credential, role });
+    const { access_token, user: userData } = response.data;
+    localStorage.setItem('skillbridge_token', access_token);
+    localStorage.setItem('skillbridge_user', JSON.stringify(userData));
+    setToken(access_token);
+    setUser(userData);
+    return userData;
+  };
+
   const logout = () => {
     localStorage.removeItem('skillbridge_token');
     localStorage.removeItem('skillbridge_user');
@@ -66,7 +76,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, loginWithGoogle, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

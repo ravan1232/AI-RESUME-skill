@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Sparkles, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Sparkles, Lock, Mail, ArrowRight } from 'lucide-react';
+import { GoogleSignInButton } from '../../components/common/GoogleSignInButton';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -36,13 +37,22 @@ export const Login = () => {
     }
   };
 
-  const handleFillDemo = (role) => {
-    if (role === 'student') {
-      setEmail('sarah.connor@university.edu');
-      setPassword('SecurePassword123!');
-    } else {
-      setEmail('admin@skillbridge.edu');
-      setPassword('AdminPassword2026!');
+  const handleGoogleSuccess = async (credential) => {
+    try {
+      setLoading(true);
+      const user = await loginWithGoogle(credential, 'student');
+      showToast(`Signed in with Google! Welcome, ${user.full_name}`, 'success');
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      console.error(err);
+      const msg = err.response?.data?.detail || 'Google authentication failed';
+      showToast(msg, 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,7 +60,7 @@ export const Login = () => {
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 selection:bg-blue-600 selection:text-white">
       <div className="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-slate-100">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <Link to="/" className="inline-flex items-center space-x-2 mb-4 group">
             <div className="w-10 h-10 rounded-xl bg-navy-900 flex items-center justify-center text-white shadow-md shadow-navy-900/20 group-hover:scale-105 transition">
               <Sparkles className="w-5 h-5 text-sky-400" />
@@ -65,7 +75,25 @@ export const Login = () => {
           </p>
         </div>
 
-        {/* Form */}
+        {/* Google Authentication Button */}
+        <div className="mb-5">
+          <GoogleSignInButton
+            text="Continue with Google"
+            onSuccess={handleGoogleSuccess}
+            onError={(err) => showToast(err, 'error')}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="relative flex items-center justify-center mb-5">
+          <div className="border-t border-slate-200 w-full" />
+          <span className="bg-white px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider relative">
+            or with email
+          </span>
+          <div className="border-t border-slate-200 w-full" />
+        </div>
+
+        {/* Email & Password Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -114,7 +142,7 @@ export const Login = () => {
               <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             ) : (
               <>
-                <span>Sign In</span>
+                <span>Sign In with Email</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -132,4 +160,3 @@ export const Login = () => {
     </div>
   );
 };
-
