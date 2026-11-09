@@ -96,3 +96,4 @@ export const GoogleSignInButton = ({ onSuccess, onError, text = 'Continue with G
     </div>
   );
 };
+
