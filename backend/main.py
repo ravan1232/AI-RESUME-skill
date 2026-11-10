@@ -14,3 +14,4 @@ if __name__ == "__main__":
     host = os.environ.get("HOST", "0.0.0.0")
     print(f"Starting SkillBridge backend on {host}:{port}...")
     uvicorn.run(app, host=host, port=port)
+

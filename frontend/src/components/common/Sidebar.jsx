@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   Settings,
   HelpCircle,
-  Award
+  Award,
+  Sparkles
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }) => {
@@ -34,6 +35,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const adminLinks = [
     { name: 'Platform Overview', path: '/admin', icon: LayoutDashboard },
     { name: 'Student Management', path: '/admin/users', icon: User },
+    { name: 'Resume Q&A Generator', path: '/admin/resume-questions', icon: Sparkles, badge: 'AI' },
     { name: 'Skills Catalog', path: '/admin/skills', icon: GraduationCap },
     { name: 'Assessment Bank', path: '/admin/assessments', icon: ShieldCheck },
   ];

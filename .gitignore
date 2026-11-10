@@ -3,6 +3,8 @@
 *.env
 backend/.env
 frontend/.env.local
+backend/data/*.json
+inspect_users.py
 
 # Python
 __pycache__/

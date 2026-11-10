@@ -303,5 +303,161 @@ class AIService:
             "feedback": f"Solid response scoring {score}/10. Practice framing answers using the STAR method for maximum impact."
         }
 
+    def generate_questions_from_resume(
+        self,
+        resume_text: str,
+        skills: Optional[List[str]] = None,
+        difficulty: str = "mid",
+        count: int = 5
+    ) -> List[Dict[str, Any]]:
+        """Generate tailored technical and architectural interview questions from candidate resume."""
+        if not skills:
+            analysis = self.analyze_resume_text(resume_text)
+            skills = analysis.get("skills", ["Python", "FastAPI", "React"])
+
+        # Try Groq AI if available
+        if self.is_configured():
+            try:
+                prompt = (
+                    "You are a Principal Engineering Recruiter and Technical Hiring Manager.\n"
+                    f"Analyze this candidate resume:\n\"\"\"{resume_text[:3000]}\"\"\"\n"
+                    f"Candidate verified skills: {json.dumps(skills)}\n"
+                    f"Target interview difficulty: {difficulty} (entry, mid, or senior).\n"
+                    f"Generate exactly {count} tailored, in-depth technical and project-focused interview questions "
+                    "strictly based on what this candidate claims on their resume.\n"
+                    "Return ONLY valid JSON matching this schema:\n"
+                    "{\n"
+                    "  \"questions\": [\n"
+                    "    {\n"
+                    "      \"id\": \"q1\",\n"
+                    "      \"category\": \"Category name (e.g. FastAPI Architecture, Distributed Systems)\",\n"
+                    "      \"question\": \"The exact interview question\",\n"
+                    "      \"ideal_answer_criteria\": \"Key technical points, edge cases, or trade-offs the interviewer should evaluate\",\n"
+                    "      \"difficulty\": \"Intermediate\",\n"
+                    "      \"resume_context\": \"Specific skill or project bullet point in the resume that prompted this question\"\n"
+                    "    }\n"
+                    "  ]\n"
+                    "}"
+                )
+                resp = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.3,
+                    response_format={"type": "json_object"}
+                )
+                data = json.loads(resp.choices[0].message.content)
+                questions = data.get("questions", [])
+                if isinstance(questions, list) and len(questions) > 0:
+                    return questions[:count]
+            except Exception as e:
+                logger.warning(f"Groq resume question generation fallback: {e}")
+
+        # Intelligent deterministic fallback generator mapped to detected skills & projects
+        SKILL_QUESTION_TEMPLATES = {
+            "python": [
+                {
+                    "category": "Python Architecture & Concurrency",
+                    "question": "Your resume highlights Python development. How do you distinguish between asyncio event loops and multithreading, and how do you prevent CPU-bound tasks from blocking the event loop in high-throughput services?",
+                    "ideal_answer_criteria": "Candidate should discuss GIL (Global Interpreter Lock), run_in_executor with ProcessPoolExecutor for CPU tasks, non-blocking I/O, and event loop thread-safety.",
+                    "difficulty": "Intermediate",
+                    "resume_context": "Prompted by Python proficiency and asynchronous backend services."
+                },
+                {
+                    "category": "Python Memory & Performance",
+                    "question": "Can you explain memory management in Python, specifically how reference counting, cyclic garbage collection, and generators with lazy evaluation optimize footprint for large datasets?",
+                    "ideal_answer_criteria": "Candidate should explain sys.getrefcount, gc module thresholds, weakref, and generator iterators vs list comprehension memory consumption.",
+                    "difficulty": "Senior",
+                    "resume_context": "Evaluates Python data engineering depth and production optimization."
+                }
+            ],
+            "fastapi": [
+                {
+                    "category": "FastAPI & Microservices",
+                    "question": "In your FastAPI projects, how do you architect dependency injection with lifespan context managers to maintain persistent database connection pooling across asynchronous endpoints?",
+                    "ideal_answer_criteria": "Candidate should describe @asynccontextmanager lifespan handler, yielding client session, Depends() yield generators, and cleanly closing connection pools on SIGTERM.",
+                    "difficulty": "Intermediate",
+                    "resume_context": "Derived from FastAPI REST API development listed on resume."
+                }
+            ],
+            "react": [
+                {
+                    "category": "React State & Performance",
+                    "question": "You list React on your resume. How do you debug and resolve unnecessary component re-renders in complex dashboards, and when should you choose Zustand/Redux vs React Context?",
+                    "ideal_answer_criteria": "Candidate should cover React.memo, useMemo/useCallback dependency arrays, Context re-rendering consumer tree issues, and selector-based state subscriptions.",
+                    "difficulty": "Intermediate",
+                    "resume_context": "Prompted by modern frontend React development listed in skills."
+                }
+            ],
+            "docker": [
+                {
+                    "category": "DevOps & Containers",
+                    "question": "Based on the Docker experience in your profile, how do you structure multi-stage Dockerfiles to minimize final image footprint, separate build dependencies from runtime, and enforce non-root security?",
+                    "ideal_answer_criteria": "Candidate should discuss FROM ... AS builder, copying only built artifacts to distroless or alpine runner image, USER appuser, and layer caching optimization.",
+                    "difficulty": "Intermediate",
+                    "resume_context": "Prompted by containerization tooling listed on resume."
+                }
+            ],
+            "mongodb": [
+                {
+                    "category": "Database Engineering",
+                    "question": "Your resume includes MongoDB. How do you analyze slow queries using explain('executionStats'), avoid in-memory sorting limitations, and design compound indexes for multi-field filtering?",
+                    "ideal_answer_criteria": "Candidate should explain ESR (Equality, Sort, Range) rule, covered queries, avoiding COLLSCAN, and working within 100MB RAM sort limits.",
+                    "difficulty": "Intermediate",
+                    "resume_context": "Derived from MongoDB Atlas database management listed in project stack."
+                }
+            ],
+            "kubernetes": [
+                {
+                    "category": "Cloud Infrastructure",
+                    "question": "How do you configure readiness and liveness probes in Kubernetes to avoid cascading service failure during traffic spikes, and how does HPA determine scaling thresholds?",
+                    "ideal_answer_criteria": "Candidate should distinguish liveness (restart pod) vs readiness (traffic routing), startupProbe for slow initializers, and metrics-server CPU/memory thresholds.",
+                    "difficulty": "Senior",
+                    "resume_context": "Derived from cloud orchestration competencies."
+                }
+            ],
+            "general_project": [
+                {
+                    "category": "System Architecture & Trade-offs",
+                    "question": "Walk us through the most technically challenging project on your resume. What key trade-offs did you make between latency, consistency, and implementation velocity, and how did you measure success?",
+                    "ideal_answer_criteria": "Candidate should articulate clear problem statement, technical stack rationale, specific engineering hurdles overcome, and quantifiable production metrics.",
+                    "difficulty": "Intermediate",
+                    "resume_context": "Synthesized from projects and practical engineering achievements in resume."
+                },
+                {
+                    "category": "Production Reliability & Incident Response",
+                    "question": "Imagine a core API in one of your featured resume projects starts experiencing sudden 500 errors and high p99 latency under production load. What is your systematic step-by-step diagnostic process?",
+                    "ideal_answer_criteria": "Candidate should detail structured triage: check error logs/APM, inspect database connection saturation, monitor CPU/memory spikes, isolate recent commits, and deploy rollback or circuit-breaker.",
+                    "difficulty": "Intermediate",
+                    "resume_context": "Evaluates practical debugging and engineering maturity."
+                }
+            ]
+        }
+
+        generated: List[Dict[str, Any]] = []
+        normalized_skills = [s.lower().replace(".js", "").replace(" ", "") for s in skills]
+
+        # Gather relevant questions
+        for key, q_list in SKILL_QUESTION_TEMPLATES.items():
+            if any(key in ns for ns in normalized_skills) or key == "general_project":
+                for q in q_list:
+                    if len(generated) < count:
+                        item = dict(q)
+                        item["id"] = f"q{len(generated) + 1}"
+                        generated.append(item)
+
+        # Fill if needed
+        while len(generated) < count:
+            idx = len(generated) + 1
+            generated.append({
+                "id": f"q{idx}",
+                "category": "Software Engineering Best Practices",
+                "question": f"In your software development workflow, how do you incorporate automated unit testing, CI/CD pipelines, and code reviews to guarantee zero-regression releases?",
+                "ideal_answer_criteria": "Candidate should cover pytest/Jest test coverage, GitHub Actions/GitLab CI linting, staging environments, and atomic commit reviews.",
+                "difficulty": "Intermediate",
+                "resume_context": "Based on overall professional engineering standards in resume."
+            })
+
+        return generated[:count]
+
 ai_service = AIService()
 

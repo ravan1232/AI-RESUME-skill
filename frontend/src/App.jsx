@@ -46,6 +46,7 @@ export default function App() {
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/users" element={<AdminDashboard />} />
+              <Route path="/admin/resume-questions" element={<AdminDashboard />} />
               <Route path="/admin/skills" element={<AdminDashboard />} />
               <Route path="/admin/assessments" element={<AdminDashboard />} />
             </Route>
