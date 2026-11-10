@@ -1,6 +1,8 @@
 import asyncio
+import json
 import logging
 import socket
+from pathlib import Path
 from urllib.parse import urlparse
 from typing import Any, Dict, List, Optional
 import certifi
@@ -9,6 +11,10 @@ from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Persist fallback storage locally so data is NEVER lost even if Atlas IP is blocked
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 def is_mongo_available(url: str) -> bool:
     """Fast check to see if target host and port are reachable before initiating driver loops."""
@@ -23,11 +29,29 @@ def is_mongo_available(url: str) -> bool:
     except Exception:
         return False
 
-# Fallback Async In-Memory / File-backed Mongo-compatible collection for resilient offline dev & tests
+# Fallback Async File-backed Mongo-compatible collection for resilient offline dev & tests
 class AsyncFallbackCollection:
     def __init__(self, name: str):
         self.name = name
-        self._data: Dict[str, Dict[str, Any]] = {}
+        self.file_path = DATA_DIR / f"{name}.json"
+        self._data: Dict[str, Dict[str, Any]] = self._load()
+
+    def _load(self) -> Dict[str, Dict[str, Any]]:
+        if self.file_path.exists():
+            try:
+                with open(self.file_path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                logger.warning(f"Could not load fallback file {self.file_path}: {e}")
+                return {}
+        return {}
+
+    def _save(self):
+        try:
+            with open(self.file_path, "w", encoding="utf-8") as f:
+                json.dump(self._data, f, indent=2, default=str)
+        except Exception as e:
+            logger.error(f"Error persisting fallback collection {self.name}: {e}")
 
     def _matches(self, doc: Dict[str, Any], query: Dict[str, Any]) -> bool:
         for k, v in query.items():
@@ -108,6 +132,7 @@ class AsyncFallbackCollection:
             import uuid
             doc_copy["_id"] = str(uuid.uuid4())
         self._data[str(doc_copy["_id"])] = doc_copy
+        self._save()
         class InsertResult:
             def __init__(self, inserted_id):
                 self.inserted_id = inserted_id
@@ -146,12 +171,14 @@ class AsyncFallbackCollection:
                         doc[k] = []
                     if v not in doc[k]:
                         doc[k].append(v)
+            self._save()
             return UpdateResult(1, 1)
         elif upsert:
             new_doc = dict(query)
             if "$set" in update:
                 new_doc.update(update["$set"])
             res = await self.insert_one(new_doc)
+            self._save()
             return UpdateResult(0, 1, res.inserted_id)
 
         return UpdateResult(0, 0)
@@ -164,6 +191,7 @@ class AsyncFallbackCollection:
         for doc_id, doc in list(self._data.items()):
             if self._matches(doc, query):
                 del self._data[doc_id]
+                self._save()
                 return DeleteResult(1)
         return DeleteResult(0)
 
@@ -248,8 +276,90 @@ class DatabaseManager:
         if self.is_connected and self.db is not None:
             return self.db[name]
         if name not in self._fallback_collections:
-            self._fallback_collections[name] = AsyncFallbackCollection(name)
+            col = AsyncFallbackCollection(name)
+            if not col._data:
+                self._seed_fallback_collection(name, col)
+            self._fallback_collections[name] = col
         return self._fallback_collections[name]
+
+    def _seed_fallback_collection(self, name: str, col: AsyncFallbackCollection):
+        """Seed initial users and skills if offline fallback storage is brand new."""
+        import uuid
+        from datetime import datetime, timezone
+        from app.utils.security import hash_password
+        now_iso = datetime.now(timezone.utc).isoformat()
+
+        if name == "users":
+            u1_id = "861b7f1f-9207-4ba3-b51d-0bd65eafc2e1"
+            u2_id = "156a7177-bf5e-4fec-a442-f85336a2057e"
+            col._data[u1_id] = {
+                "_id": u1_id,
+                "email": "roshanmallick1890@gmail.com",
+                "hashed_password": hash_password("password123"),
+                "full_name": "Roshan",
+                "role": "student",
+                "is_active": True,
+                "created_at": now_iso,
+                "updated_at": now_iso
+            }
+            col._data[u2_id] = {
+                "_id": u2_id,
+                "email": "keerthi12@gmail.com",
+                "hashed_password": hash_password("password123"),
+                "full_name": "Keerthi",
+                "role": "admin",
+                "is_active": True,
+                "created_at": now_iso,
+                "updated_at": now_iso
+            }
+            col._save()
+
+        elif name == "student_profiles":
+            u1_id = "861b7f1f-9207-4ba3-b51d-0bd65eafc2e1"
+            col._data[u1_id] = {
+                "_id": str(uuid.uuid4()),
+                "user_id": u1_id,
+                "full_name": "Roshan",
+                "headline": "Full-Stack Engineer & AI Placement Candidate",
+                "college": "Institute of Technology",
+                "graduation_year": 2026,
+                "skills_can_teach": [
+                    {"skill_name": "Python", "proficiency": "advanced", "years_of_experience": 2.0, "verified": True, "rating": 5.0},
+                    {"skill_name": "FastAPI", "proficiency": "intermediate", "years_of_experience": 1.5, "verified": True, "rating": 4.8}
+                ],
+                "skills_want_to_learn": [
+                    {"skill_name": "React", "target_proficiency": "advanced", "priority": "high"},
+                    {"skill_name": "Docker", "target_proficiency": "intermediate", "priority": "medium"}
+                ],
+                "placement_readiness": {
+                    "overall_score": 85,
+                    "ats_score": 88,
+                    "technical_skill_score": 84,
+                    "soft_skill_score": 80,
+                    "mock_interview_score": 82,
+                    "verified_skills_count": 2,
+                    "last_updated": now_iso
+                },
+                "created_at": now_iso,
+                "updated_at": now_iso
+            }
+            col._save()
+
+        elif name == "skills":
+            default_skills = [
+                {"name": "Python", "category": "Programming Languages", "description": "Core Python programming & OOP"},
+                {"name": "FastAPI", "category": "Web Frameworks", "description": "High-performance async Python web framework"},
+                {"name": "React", "category": "Frontend Development", "description": "Modern component-based UI library"},
+                {"name": "Docker", "category": "DevOps & Cloud", "description": "Containerization platform"},
+                {"name": "Kubernetes", "category": "DevOps & Cloud", "description": "Container orchestration system"},
+                {"name": "Machine Learning", "category": "AI & Data Science", "description": "Predictive modeling and algorithms"},
+                {"name": "System Design", "category": "Architecture", "description": "Scalable distributed system architecture"}
+            ]
+            for s in default_skills:
+                sid = str(uuid.uuid4())
+                s["_id"] = sid
+                col._data[sid] = s
+            col._save()
 
     async def close(self):
         if self.client:
