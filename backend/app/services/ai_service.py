@@ -214,67 +214,215 @@ class AIService:
         if self.is_configured():
             try:
                 system_prompt = (
-                    "You are SkillBridge AI, an expert placement mentor and career architect. "
-                    "Help university students optimize their resumes, crack campus interviews, "
-                    "and find peer tutors for missing skills. Keep your answers concise, practical, and inspiring."
+                    "You are SkillBridge Placement AI, a distinguished campus recruitment mentor, "
+                    "senior software architect, and career advisor. "
+                    "Provide clear, deeply structured, actionable, and inspiring guidance for university placement candidates. "
+                    "Format answers with Markdown headers, bullet points, and code snippets where appropriate."
                 )
                 messages = [{"role": "system", "content": system_prompt}]
                 if context:
-                    messages.append({"role": "system", "content": f"Student context: {context}"})
+                    messages.append({"role": "system", "content": f"Student Context: {context}"})
                 messages.append({"role": "user", "content": message})
 
                 resp = self.client.chat.completions.create(
                     model=self.model,
                     messages=messages,
                     temperature=0.7,
-                    max_tokens=600
+                    max_tokens=800
                 )
                 return resp.choices[0].message.content.strip()
             except Exception as e:
                 logger.warning("Groq chatbot error: %s", e)
 
-        # Fallback intelligent responder
-        msg_l = message.lower()
-        if "resume" in msg_l or "ats" in msg_l:
+        # Advanced Conversational Knowledge Engine (Works 100% offline or without API key)
+        msg_l = message.lower().strip()
+        student_name = "there"
+        if context and "Student name:" in context:
+            try:
+                student_name = context.split("Student name:")[1].split(".")[0].strip()
+            except Exception:
+                pass
+
+        # 1. Greetings
+        if re.search(r'\b(hi|hello|hey|greetings|good morning|good afternoon|good evening)\b', msg_l):
             return (
-                "To optimize your resume for ATS systems:\n"
-                "1. Use standard headings (Experience, Education, Skills, Projects).\n"
-                "2. Include quantifiable outcomes (e.g. 'Improved API response latency by 35%').\n"
-                "3. Ensure the exact technical keywords from the job description appear naturally.\n"
-                "4. Stick to single-column, cleanly parsed formatting."
+                f"Hello {student_name}! 👋 I am your **SkillBridge Placement AI Advisor**.\n\n"
+                "I am here to help you accelerate your campus placement readiness. You can ask me about:\n"
+                "- 📄 **Resume & ATS Optimization**: How to format bullet points and beat screening filters.\n"
+                "- 🎤 **Technical Interviews**: Core concepts in Python, React, FastAPI, System Design, or SQL.\n"
+                "- 🎯 **Mock Interview Practice**: Answering behavioral and architectural questions.\n"
+                "- 🧩 **DSA Roadmaps**: High-yield LeetCode patterns for product-based company tests.\n"
+                "- 🤝 **Peer Skill Exchange**: Connecting with campus mentors for missing skills.\n\n"
+                "What would you like to prepare for today?"
             )
-        elif "interview" in msg_l or "mock" in msg_l:
+
+        # 2. Self Introduction / Tell Me About Yourself
+        if "tell me about yourself" in msg_l or "introduce myself" in msg_l or "introduction" in msg_l or "self intro" in msg_l:
             return (
-                "For technical placement interviews, focus on the STAR method (Situation, Task, Action, Result).\n"
-                "Structure your code explanations by discussing time and space complexity upfront, "
-                "handling edge cases, and walking through your test strategy."
+                "### 🎯 The Winning 'Tell Me About Yourself' 4-Step Formula:\n\n"
+                "Keep your answer between **90 to 120 seconds** using this proven structure:\n\n"
+                "1. **Who You Are (Current Role & Education)**:\n"
+                "   * *\"I am currently completing my degree in Computer Science with a strong focus on modern full-stack development and backend systems.\"*\n\n"
+                "2. **Core Technical Highlights (What you build)**:\n"
+                "   * *\"My primary technical stack includes Python, FastAPI, React, and MongoDB. Recently, I built an end-to-end placement readiness platform that processes PDF resumes and coordinates peer skill exchanges in real-time.\"*\n\n"
+                "3. **Engineering Achievements (Quantified Impact)**:\n"
+                "   * *\"In that project, I implemented asynchronous token bucket rate limiting and optimized MongoDB indexing, which reduced API response latency by 40% under concurrent loads.\"*\n\n"
+                "4. **Why You Are Here (The Forward Link)**:\n"
+                "   * *\"I’m excited about this opportunity with your engineering team because of your focus on scalable cloud infrastructure, where I can apply my backend engineering depth and grow rapidly.\"*\n\n"
+                "💡 **Pro Tip:** Never recite your resume word-for-word. Tell the story behind the technical decisions you made!"
             )
-        elif "peer" in msg_l or "exchange" in msg_l:
+
+        # 3. Python Core & Placement Concepts
+        if "python" in msg_l:
             return (
-                "SkillBridge connects you with student peers who have already mastered your missing placement skills! "
-                "Check the 'Job Gap Matcher' to see automatic peer mentor recommendations based on your target role."
+                "### 🐍 Top Python Technical Placement Concepts & Questions:\n\n"
+                "In placement interviews, interviewers frequently probe Python's memory model and concurrency:\n\n"
+                "1. **Global Interpreter Lock (GIL)**:\n"
+                "   * Python's GIL ensures only one native thread executes Python bytecode at a time in CPython. For I/O-bound tasks, use `asyncio` or `threading`. For CPU-bound tasks, use `multiprocessing` to bypass the GIL.\n\n"
+                "2. **Asyncio Event Loop vs Multi-threading**:\n"
+                "   * `asyncio` uses single-threaded cooperative multitasking. Avoid synchronous blocking calls (like `time.sleep()` or `requests.get()`) in `async def` functions — always use `asyncio.sleep()` or `httpx.AsyncClient`!\n\n"
+                "3. **Generators & Iterators**:\n"
+                "   * Generators use `yield` and evaluate lazily, keeping memory at $O(1)$ when streaming millions of records instead of loading full lists into RAM.\n\n"
+                "4. **Decorators**:\n"
+                "   * Functions that wrap other functions to add cross-cutting behavior (e.g. logging, authentication, caching) using `@functools.wraps`.\n\n"
+                "💡 Would you like to practice a mock technical question on Python async architecture?"
             )
-        else:
+
+        # 4. React & Frontend Architecture
+        if "react" in msg_l or "frontend" in msg_l:
             return (
-                "SkillBridge AI is here to guide your career placement journey. "
-                "You can upload your resume in the 'Resume & ATS Score' hub, compare it against target Job Descriptions, "
-                "and find campus peer mentors to teach you missing skills!"
+                "### ⚛️ High-Frequency React & Frontend Placement Topics:\n\n"
+                "1. **Virtual DOM & Reconciliation (Fiber)**:\n"
+                "   * React maintains a lightweight in-memory representation of the DOM. Diffing algorithm operates in $O(n)$ by comparing element types and unique `key` props, applying atomic patches to the real DOM.\n\n"
+                "2. **State Management Trade-Offs**:\n"
+                "   * **React Context**: Great for static or rarely changing global values (auth, themes). Bad for high-frequency updates because all consuming components re-render.\n"
+                "   * **Zustand / Redux Toolkit**: Uses selector-based subscriptions so only the component reading the specific slice of state re-renders.\n\n"
+                "3. **Optimization Hooks**:\n"
+                "   * `useMemo`: Caches expensive computation results across renders.\n"
+                "   * `useCallback`: Maintains referential stability of function definitions passed to memoized children (`React.memo`).\n\n"
+                "4. **Common Interview Question**: *\"How do you prevent prop-drilling without adding complex external dependencies?\"* (Answer: Component composition with `children` or focused React Context providers)."
             )
+
+        # 5. FastAPI & Backend Microservices
+        if "fastapi" in msg_l or "backend" in msg_l or "api" in msg_l or "rest" in msg_l:
+            return (
+                "### ⚡ FastAPI & Production Backend Best Practices:\n\n"
+                "1. **Lifespan Context Managers (`@asynccontextmanager`)**:\n"
+                "   * Replaced `@app.on_event('startup')`. Guarantees clean setup of database connection pools (Motor/PyMongo/SQLAlchemy) on boot and graceful teardown on SIGTERM.\n\n"
+                "2. **Dependency Injection (`Depends()`)**:\n"
+                "   * Decouples business logic from database sessions, JWT token extraction, and RBAC authorization headers.\n\n"
+                "3. **Pydantic V2 Validation**:\n"
+                "   * Built on Rust (`pydantic-core`), providing 5-10x faster serialization, automatic OpenAPI Swagger schema generation, and strict type coercions.\n\n"
+                "4. **CORS & Security**:\n"
+                "   * Always configure `allow_origins`, specify strict HTTP verbs (`allow_methods=['GET', 'POST', ...]`), and protect JWT cookies with `HttpOnly` and `SameSite=Strict` flags in production."
+            )
+
+        # 6. Databases: SQL vs NoSQL / MongoDB / Indexing
+        if "database" in msg_l or "sql" in msg_l or "nosql" in msg_l or "mongo" in msg_l or "postgres" in msg_l:
+            return (
+                "### 🗄️ Database Engineering Interview Essentials:\n\n"
+                "1. **SQL (PostgreSQL/MySQL) vs NoSQL (MongoDB)**:\n"
+                "   * **SQL**: Strong ACID guarantees, strict schemas, optimal for relational data with complex joins (banking, transactions).\n"
+                "   * **NoSQL**: Flexible document model, horizontal scaling via sharding, optimal for hierarchical JSON, high-velocity telemetry, and rapidly evolving schemas.\n\n"
+                "2. **Indexing Strategies (B-Trees)**:\n"
+                "   * Indexes dramatically accelerate queries from $O(n)$ full collection scans (`COLLSCAN`) to $O(\\log n)$ index lookups (`IXSCAN`).\n"
+                "   * Follow the **ESR Rule** for compound indexes: **E**quality filters first $\\rightarrow$ **S**ort fields second $\\rightarrow$ **R**ange queries last.\n\n"
+                "3. **Transactions in MongoDB**:\n"
+                "   * Single document writes are atomic by default. Multi-document ACID transactions are supported across replica sets using client sessions."
+            )
+
+        # 7. Data Structures & Algorithms (DSA)
+        if "dsa" in msg_l or "leetcode" in msg_l or "algorithm" in msg_l or "binary search" in msg_l or "tree" in msg_l:
+            return (
+                "### 🧩 High-Yield Placement DSA Patterns (Focus on Patterns, Not 1,000 Problems):\n\n"
+                "1. **Two Pointers & Sliding Window**:\n"
+                "   * Trapping Rainwater, Longest Substring Without Repeating Characters, 3Sum ($O(n)$ time, $O(1)$ space).\n\n"
+                "2. **Fast & Slow Pointers (Floyd's Cycle Detection)**:\n"
+                "   * Linked List cycle detection, finding middle of linked list in a single pass.\n\n"
+                "3. **BFS & DFS on Graphs/Trees**:\n"
+                "   * Level Order Traversal (Queue), Number of Islands (Grid DFS/BFS), Course Schedule (Topological Sort with Kahn's algorithm).\n\n"
+                "4. **Dynamic Programming (Memoization to Tabulation)**:\n"
+                "   * 0/1 Knapsack, Longest Common Subsequence (LCS), Coin Change ($O(n \\cdot W)$ complexity).\n\n"
+                "💡 **Interview Rule:** When coding in an interview, speak your thought process out loud before writing a single line of code! Always state the Time and Space complexity."
+            )
+
+        # 8. System Design & Scalability
+        if "system design" in msg_l or "scale" in msg_l or "distributed" in msg_l or "microservice" in msg_l:
+            return (
+                "### 🏗️ 5-Step System Design Interview Framework:\n\n"
+                "When asked to design a system (e.g. TinyURL, WhatsApp, Uber, Netflix):\n\n"
+                "1. **Step 1: Scope & Functional Requirements (5 mins)**:\n"
+                "   * What are the core features? (e.g. read heavy vs write heavy? Latency targets?)\n\n"
+                "2. **Step 2: Capacity Estimation (Back-of-the-envelope)**:\n"
+                "   * 100M Daily Active Users $\\times$ 10 requests = 1 Billion requests/day $\\approx$ 12,000 QPS (Queries Per Second).\n\n"
+                "3. **Step 3: High-Level Architecture**:\n"
+                "   * Client $\\rightarrow$ DNS / CDN $\\rightarrow$ Load Balancer (Nginx/ALB) $\\rightarrow$ API Gateway $\\rightarrow$ Stateless Microservices $\\rightarrow$ Cache (Redis) $\\rightarrow$ Primary/Replica DB.\n\n"
+                "4. **Step 4: Deep Dive into Core Bottlenecks**:\n"
+                "   * Caching strategies (Cache-aside vs Write-through), DB Sharding keys, Message Queues (Kafka/RabbitMQ) for asynchronous worker decoupling.\n\n"
+                "5. **Step 5: High Availability & Fault Tolerance**:\n"
+                "   * Circuit breakers, database replication lag handling, multi-region failover."
+            )
+
+        # 9. Resume & ATS Optimization
+        if "resume" in msg_l or "ats" in msg_l or "score" in msg_l:
+            return (
+                "### 📄 Blueprint for a 90%+ ATS Score Resume:\n\n"
+                "1. **The XYZ Bullet Point Formula (Google's Standard)**:\n"
+                "   * Write: *\"Accomplished [X] as measured by [Y], by doing [Z].\"*\n"
+                "   * ❌ *\"Built a website with React.\"*\n"
+                "   * ✅ *\"Architected a responsive dashboard with React & Tailwind, reducing page load latency by 35% across 2,000 monthly active users.\"*\n\n"
+                "2. **ATS Formatting Rules**:\n"
+                "   * Single-column layout (no tables, multi-column sidebars, or graphic skill meters).\n"
+                "   * Use standard section headers: **Education, Experience, Projects, Technical Skills**.\n"
+                "   * Export as clean searchable text PDF (not scanned images).\n\n"
+                "3. **Keyword Mirroring**:\n"
+                "   * Use our **Resume & ATS Score** scanner to extract your skills, then test your target job description in **Job Gap Matcher** to find missing keywords!"
+            )
+
+        # 10. Behavioral & HR Rounds (STAR Method)
+        if "behavioral" in msg_l or "hr" in msg_l or "star" in msg_l or "weakness" in msg_l or "conflict" in msg_l:
+            return (
+                "### 🌟 Mastering Behavioral & HR Rounds with STAR:\n\n"
+                "Interviewers use behavioral questions to test cultural fit, grit, and communication:\n\n"
+                "- **S (Situation)**: Set the context briefly (Who, when, project setting).\n"
+                "- **T (Task)**: What was the specific problem or assignment you had to solve?\n"
+                "- **A (Action)**: The most important section (60% of your time). What specific technical and interpersonal actions did *you* take?\n"
+                "- **R (Result)**: The quantifiable outcome (e.g. *\"Delivered 3 days ahead of schedule, zero production outages, and received peer recognition\"*).\n\n"
+                "💡 **How to answer 'What is your greatest weakness?'**:\n"
+                "Choose a real technical or process habit (e.g. *\"Early on, I struggled with trying to implement too many features at once\"*), and explain the exact system you built to fix it (e.g. *\"Now I use milestone breakdown and MVP scoping, which has kept my last 3 projects on track\"*)."
+            )
+
+        # 11. Generic / Open-Ended Placement Inquiry
+        return (
+            f"### 🚀 Placement Strategy for {student_name}:\n\n"
+            f"You asked: *\"{message}\"*\n\n"
+            "Here is the systematic path to crack your target placement rounds:\n\n"
+            "1. **Audit Your Profile & Resume**:\n"
+            "   * Check the **Resume & ATS Score** hub to analyze keyword extraction and formatting score.\n"
+            "2. **Target Your Dream Roles**:\n"
+            "   * Paste target job descriptions in **Job Gap Matcher** to calculate your match percentage.\n"
+            "3. **Fill Skill Gaps via Campus Mentors**:\n"
+            "   * Use **Peer Skill Exchange** to schedule live 1-on-1 sessions with student peers who already know your missing skills.\n"
+            "4. **Interactive Simulation**:\n"
+            "   * Run real campus technical rounds in **AI Mock Interview** and verify your skills in **Skill Verification**!\n\n"
+            "Would you like more details on a specific language, interview question, or placement company?"
+        )
 
     def evaluate_interview_response(self, question: str, answer: str) -> Dict[str, Any]:
         """Evaluate mock interview answer."""
         if self.is_configured():
             try:
                 prompt = (
-                    f"Evaluate this mock interview question and answer:\n"
-                    f"Question: {question}\n"
+                    f"You are a Senior Principal Engineer and Hiring Committee Evaluator.\n"
+                    f"Evaluate this mock interview response:\n"
+                    f"Interview Question: {question}\n"
                     f"Candidate Answer: {answer}\n\n"
-                    "Return ONLY valid JSON matching this structure:\n"
+                    "Return ONLY valid JSON matching this schema:\n"
                     "{\n"
                     "  \"score\": 8,\n"
-                    "  \"strengths\": [\"clear explanation\", \"good structure\"],\n"
-                    "  \"improvements\": [\"mention edge cases\", \"quantify metrics\"],\n"
-                    "  \"feedback\": \"Constructive mentor feedback summary\"\n"
+                    "  \"strengths\": [\"Strength 1\", \"Strength 2\"],\n"
+                    "  \"improvements\": [\"Actionable improvement 1\", \"Actionable improvement 2\"],\n"
+                    "  \"feedback\": \"Concise, empowering mentor feedback summary\"\n"
                     "}"
                 )
                 resp = self.client.chat.completions.create(
@@ -287,20 +435,66 @@ class AIService:
             except Exception as e:
                 logger.warning("Groq interview evaluation fallback: %s", e)
 
-        # Deterministic evaluation fallback
-        length = len(answer.split())
-        score = min(9, max(4, int(length / 20) + 4))
+        # Context-Aware Intelligent Evaluation Engine (Deterministic & Robust)
+        words = answer.strip().split()
+        length = len(words)
+        answer_lower = answer.lower()
+
+        # Check for core engineering terminology
+        tech_indicators = [
+            "latency", "throughput", "cache", "redis", "database", "index",
+            "async", "asyncio", "thread", "concurrency", "lock", "queue",
+            "trade-off", "tradeoff", "complexity", "o(1)", "o(n)", "scale",
+            "stateless", "load balancer", "kubernetes", "docker", "token bucket",
+            "virtual dom", "reconciliation", "memo", "star", "result", "metric"
+        ]
+
+        matched_terms = [t for t in tech_indicators if t in answer_lower]
+        term_count = len(matched_terms)
+
+        # Calculate dynamic score (1 to 10)
+        if length < 15:
+            score = 3
+        elif length < 35:
+            score = 5 if term_count >= 1 else 4
+        elif length < 70:
+            score = min(8, 6 + (term_count // 2))
+        else:
+            score = min(10, max(7, 7 + (term_count // 2)))
+
+        strengths = []
+        improvements = []
+
+        if term_count > 0:
+            strengths.append(f"Demonstrated technical depth by referencing core concepts: {', '.join(matched_terms[:3])}.")
+        if length >= 40:
+            strengths.append("Provided a thorough, structured explanation of the problem space.")
+        else:
+            strengths.append("Addressed the interviewer's prompt directly without hesitation.")
+
+        if "star" in answer_lower or ("situation" in answer_lower and "result" in answer_lower):
+            strengths.append("Excellent structured delivery utilizing the STAR methodology.")
+
+        # Constructive improvements
+        if term_count < 2:
+            improvements.append("Incorporate specific technical mechanisms (e.g. caching layer, concurrency model, or algorithmic trade-offs).")
+        if "complexity" not in answer_lower and "time" not in answer_lower and "o(" not in answer_lower:
+            improvements.append("Explicitly state Time and Space Complexity ($O(1)$, $O(n)$) to show computer science rigor.")
+        if "edge" not in answer_lower and "fail" not in answer_lower and "error" not in answer_lower:
+            improvements.append("Discuss edge cases and failure modes (e.g. network timeouts, distributed lock expiration, node failure).")
+        if length < 30:
+            improvements.append("Expand on your reasoning — brief answers can leave the hiring committee wanting more architectural detail.")
+
+        feedback = (
+            f"Candidate scored {score}/10. "
+            f"{'Strong, technically grounded response with sound engineering rationale.' if score >= 8 else 'Good foundation; elevate your answer by highlighting production trade-offs and complexity analysis.'}"
+        )
+
         return {
             "score": score,
-            "strengths": [
-                "Direct address of the interviewer's prompt",
-                "Logical progression of problem-solving steps"
-            ],
-            "improvements": [
-                "Consider diving deeper into trade-offs and alternative approaches",
-                "Include a concrete example from your past projects or internships"
-            ],
-            "feedback": f"Solid response scoring {score}/10. Practice framing answers using the STAR method for maximum impact."
+            "strengths": strengths,
+            "improvements": improvements[:2],
+            "feedback": feedback
         }
 
     def generate_questions_from_resume(
