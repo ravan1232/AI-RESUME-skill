@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Sparkles, Lock, Mail, ArrowRight } from 'lucide-react';
 import { GoogleSignInButton } from '../../components/common/GoogleSignInButton';
+import { getApiErrorMessage } from '../../utils/errorHelpers';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -30,8 +31,7 @@ export const Login = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      const msg = err.response?.data?.detail || 'Authentication failed. Please verify credentials.';
-      showToast(msg, 'error');
+      showToast(getApiErrorMessage(err, 'Authentication failed. Please verify credentials.'), 'error');
     } finally {
       setLoading(false);
     }
@@ -49,8 +49,7 @@ export const Login = () => {
       }
     } catch (err) {
       console.error(err);
-      const msg = err.response?.data?.detail || 'Google authentication failed';
-      showToast(msg, 'error');
+      showToast(getApiErrorMessage(err, 'Google authentication failed'), 'error');
     } finally {
       setLoading(false);
     }

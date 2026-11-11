@@ -160,8 +160,8 @@ async def google_auth(payload: GoogleAuthRequest):
 
     # Check if mock/demo credential for immediate testing
     if payload.credential.startswith("mock_google_"):
-        parts = payload.credential.split("_")
-        email = parts[2] if len(parts) > 2 else "roshanmallick1890@gmail.com"
+        raw_email = payload.credential.removeprefix("mock_google_").strip()
+        email = raw_email if "@" in raw_email else "roshanmallick1890@gmail.com"
         full_name = email.split("@")[0].capitalize()
     else:
         # Verify genuine Google ID token with Google's public tokeninfo endpoint
@@ -175,7 +175,8 @@ async def google_auth(payload: GoogleAuthRequest):
                     )
                 google_info = res.json()
                 email = google_info.get("email")
-                if not email or not google_info.get("email_verified", True):
+                email_verified = str(google_info.get("email_verified", "true")).lower() == "true"
+                if not email or not email_verified:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Google account email is not verified."

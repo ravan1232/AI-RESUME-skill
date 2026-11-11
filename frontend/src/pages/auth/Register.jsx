@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Sparkles, Lock, Mail, User, Shield, ArrowRight } from 'lucide-react';
 import { GoogleSignInButton } from '../../components/common/GoogleSignInButton';
+import { getApiErrorMessage } from '../../utils/errorHelpers';
 
 export const Register = () => {
   const [fullName, setFullName] = useState('');
@@ -28,8 +29,7 @@ export const Register = () => {
       }
     } catch (err) {
       console.error(err);
-      const msg = err.response?.data?.detail || 'Google registration failed';
-      showToast(msg, 'error');
+      showToast(getApiErrorMessage(err, 'Google registration failed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -57,8 +57,7 @@ export const Register = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      const msg = err.response?.data?.detail || 'Registration failed. Please try again.';
-      showToast(msg, 'error');
+      showToast(getApiErrorMessage(err, 'Registration failed. Please try again.'), 'error');
     } finally {
       setLoading(false);
     }
